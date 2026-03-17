@@ -6,69 +6,58 @@
     <title>مساعد TAIPING STUDY HARD</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 20px; }
-        .chat-container { width: 450px; max-width: 95%; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; height: 650px; }
-        .chat-header { background: #007bff; color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; }
+        .chat-container { width: 450px; max-width: 95%; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; height: 600px; }
+        .chat-header { background: #007bff; color: white; padding: 20px; text-align: center; font-weight: bold; }
         #chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f9f9f9; }
-        .message { padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.5; font-size: 15px; word-wrap: break-word; }
-        .user-msg { background: #007bff; color: white; align-self: flex-start; border-bottom-right-radius: 2px; }
-        .ai-msg { background: #e9ecef; color: #333; align-self: flex-end; border-bottom-left-radius: 2px; border: 1px solid #dee2e6; }
-        .chat-input { display: flex; padding: 15px; border-top: 1px solid #eee; background: white; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; padding-right: 20px; }
-        #send-btn { background: #007bff; color: white; border: none; padding: 10px 20px; margin-right: 8px; border-radius: 25px; cursor: pointer; font-weight: bold; }
-        #send-btn:disabled { background: #ccc; }
+        .message { padding: 12px 18px; border-radius: 18px; max-width: 80%; font-size: 15px; }
+        .user-msg { background: #007bff; color: white; align-self: flex-start; }
+        .ai-msg { background: #e9ecef; color: #333; align-self: flex-end; border: 1px solid #dee2e6; }
+        .chat-input { display: flex; padding: 15px; border-top: 1px solid #eee; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
+        #send-btn { background: #007bff; color: white; border: none; padding: 10px 20px; margin-right: 8px; border-radius: 25px; cursor: pointer; }
     </style>
 </head>
 <body>
-
-<div class="chat-container">
-    <div class="chat-header">🎓 مساعد TAIPING STUDY HARD</div>
-    <div id="chat-box">
-        <div class="message ai-msg">مرحباً بك يا صديقي! كيف يمكنني مساعدتك في دراستك اليوم؟</div>
+    <div class="chat-container">
+        <div class="chat-header">🎓 مساعد TAIPING STUDY HARD</div>
+        <div id="chat-box">
+            <div class="message ai-msg">مرحباً! أنا مساعدك الذكي، كيف يمكنني مساعدتك؟</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="اكتب سؤالك هنا..." onkeypress="if(event.key === 'Enter') sendMessage()">
+            <button id="send-btn" onclick="sendMessage()">إرسال</button>
+        </div>
     </div>
-    <div class="chat-input">
-        <input type="text" id="user-input" placeholder="اكتب سؤالك هنا..." onkeypress="if(event.key === 'Enter') sendMessage()">
-        <button id="send-btn" onclick="sendMessage()">إرسال</button>
-    </div>
-</div>
 
-<script>
-    async function sendMessage() {
-        const inputField = document.getElementById("user-input");
-        const sendBtn = document.getElementById("send-btn");
-        const userText = inputField.value.trim();
-        
-        if (!userText) return;
+    <script>
+        async function sendMessage() {
+            const inputField = document.getElementById("user-input");
+            const userText = inputField.value.trim();
+            if (!userText) return;
 
-        appendMessage(userText, 'user-msg');
-        inputField.value = "";
-        sendBtn.disabled = true;
+            appendMessage(userText, 'user-msg');
+            inputField.value = "";
 
-        try {
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: userText })
-            });
-            
-            if (!response.ok) throw new Error('خطأ في الرد');
-            
-            const data = await response.json();
-            appendMessage(data.text, 'ai-msg');
-        } catch (error) {
-            appendMessage("❌ فشل الاتصال بالسيرفر. تأكد من إعدادات Vercel.", 'ai-msg');
-        } finally {
-            sendBtn.disabled = false;
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: userText })
+                });
+                const data = await response.json();
+                appendMessage(data.text, 'ai-msg');
+            } catch (error) {
+                appendMessage("❌ فشل الاتصال بالسيرفر.", 'ai-msg');
+            }
         }
-    }
 
-    function appendMessage(text, className) {
-        const msgDiv = document.createElement("div");
-        msgDiv.className = `message ${className}`;
-        msgDiv.innerText = text;
-        const chatBox = document.getElementById("chat-box");
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-</script>
+        function appendMessage(text, className) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `message ${className}`;
+            msgDiv.innerText = text;
+            document.getElementById("chat-box").appendChild(msgDiv);
+            document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
+        }
+    </script>
 </body>
 </html>
